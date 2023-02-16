@@ -13,6 +13,7 @@ intents.members = True
 intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 tree = app_commands
+discord.utils.setup_logging()
 
 @client.event
 async def on_ready():
@@ -31,7 +32,8 @@ async def on_ready():
 @tree.choices(command=[
     Choice(name='Points', value='Stats.points'),
     Choice(name='Render', value='Misc.Tee Render'),
-    Choice(name='Random', value='Misc.Random Tee Render')
+    Choice(name='Random', value='Misc.Random Tee Render'),
+    Choice(name='Test', value='test')
     ])
 
 @commands.is_owner() # Make this command only available to the bot owner
@@ -50,6 +52,7 @@ async def setup(): # Loading cogs from other files
         await client.load_extension('Stats.points')
         await client.load_extension('Misc.Tee Render')
         await client.load_extension('Misc.Random Tee Render')
+        await client.load_extension('test')
         await client.start(token) # Client token. NEVER share this with anyone, as it gives them access to your bot.
 
 asyncio.run(setup())

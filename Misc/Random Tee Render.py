@@ -9,6 +9,7 @@ import os
 import discord
 from discord.ext import commands
 from discord import app_commands
+from discord.ui import Button, View
 from discord.app_commands import Choice
 
 global bot_dir
@@ -36,6 +37,9 @@ def Render(): # Render the tee from asset image
     if color:
         body_hsl = [random.choice(range(0, 255)), random.choice(range(0, 255)), random.choice(range(0, 255))] # Random H, S, L values
         foot_hsl = [random.choice(range(0, 255)), random.choice(range(0, 255)), random.choice(range(0, 255))] # Random H, S, L values
+    else:
+        body_hsl = [0, 0, 0]
+        foot_hsl = [0, 0, 0]
 
     
     img_random = random.choice(os.listdir(f"{bot_dir}/Images/Tee Skins")) # Random Skin
@@ -295,26 +299,41 @@ def Render(): # Render the tee from asset image
     with BytesIO() as img_binary: # This is to be able to send the image as a message without having to save it locally
         skin.save(img_binary, 'PNG')
         img_binary.seek(0)
-        file = discord.File(fp=img_binary, filename="image.png")
+        file = discord.File(fp=img_binary, filename="file.png")
+    
+    with BytesIO() as img2_binary:
+        asset.save(img2_binary, 'PNG')
+        img2_binary.seek(0)
+        asset_file = discord.File(fp=img2_binary, filename="asset.png")
 
-    return(file) # Return to discord command with image
+    return(file, asset_file, body_hsl, foot_hsl) # Return to discord command with image
 
 class RandomRender(commands.Cog):
     def __init__(self, client):
         self.client = client
-    
+
     @client.tree.command(name="random", description="Renders a random tee with random colors/eyes")
     async def tee(self, interaction: discord.Interaction):
         await interaction.response.defer() # Give time for image to generate
 
-        file = Render() # Render Tee
+        file, asset, body_hsl, foot_hsl = Render()
+        body_h, body_s, body_l = body_hsl
+        foot_h, foot_s, foot_l = foot_hsl
 
-        em = discord.Embed(
-            title=f"Tee Render",
+        imageEmbed = discord.Embed(
+            title="Tee Render",
             description="Please report any issues with the image")
+        imageEmbed.set_image(url="attachment://file.png")
 
-        em.set_image(url="attachment://image.png")
-        await interaction.followup.send(file=file, embed=em)
+        infoEmbed = discord.Embed(
+            title="Render Info",
+            description="Info about the Tee skin")
+        infoEmbed.add_field(name="\u200b", value=f"```css\n[Body]\n[H:{body_h}] \n[S:{body_s}] \n[L:{body_l}]\n```") # u200b for invisible name, css codeblock for cyan text
+        infoEmbed.add_field(name="\u200b", value=f"```html\n<Feet>\n<H:{foot_h}> \n<S:{foot_s}> \n<L:{foot_l}>\n```") # u200b for invisible name, html codeblock for yellow text
+        infoEmbed.set_image(url="attachment://asset.png")
+
+        await interaction.followup.send(files=[file, asset], embeds=[imageEmbed, infoEmbed])
+
 
 async def setup(client): # Adding the class as a cog
     await client.add_cog(RandomRender(client))
