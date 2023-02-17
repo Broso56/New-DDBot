@@ -316,7 +316,9 @@ class RandomRender(commands.Cog):
     async def tee(self, interaction: discord.Interaction):
         await interaction.response.defer() # Give time for image to generate
 
-        file, asset, body_hsl, foot_hsl = Render()
+        async with client:
+            file, asset, body_hsl, foot_hsl = await client.loop.run_in_executor(None, Render) # Render Tee (Run in executor to prevent PIL blocking the event loop)
+
         body_h, body_s, body_l = body_hsl
         foot_h, foot_s, foot_l = foot_hsl
 

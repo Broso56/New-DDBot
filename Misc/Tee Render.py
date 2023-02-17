@@ -2,7 +2,7 @@
 from PIL import Image, ImageOps
 from io import BytesIO
 import math
-
+import functools
 
 # Discord Imports
 import discord
@@ -340,8 +340,12 @@ class TeeRender(commands.Cog):
         else:
             body_color = 0, 0, 0
             feet_color = 0, 0, 0
+        
+        render_param = functools.partial(Render, asset, eyes.value, deg, iscenter, iscolor, body_color, feet_color) # Pack all parameters into a single variable
 
-        file = Render(asset, eyes.value, deg, iscenter, iscolor, body_color, feet_color) # Render Tee
+        async with client:
+            file = await client.loop.run_in_executor(None, render_param) # Render Tee (Run in executor to prevent PIL blocking the event loop)
+
         if file == True: # Function returns invalid_dimensions as true if the dimensions arent 2:1
             await interaction.followup.send("```arm\nERROR: \"Image Dimensions Aren't 2:1\"\n```")
             return

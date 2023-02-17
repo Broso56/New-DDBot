@@ -1,9 +1,9 @@
 # Image Imports
 from PIL import Image, ImageDraw, ImageFont, ImageOps
-import requests
-import urllib.parse
 from datetime import datetime
 from io import BytesIO
+import aiohttp
+import functools
 
 # Discord Imports
 import discord
@@ -21,13 +21,12 @@ intents.message_content = True
 client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=True, intents=intents.all())
 tree = app_commands
 
-def Scrape(player_name):
-    player_url = urllib.parse.quote(player_name)
-    url = f'https://ddnet.tw/players/?json2={player_url}'
-    data = requests.get(url).json()
-    
+async def Scrape(player_name):
+    url = f'https://ddnet.tw/players/?json2={player_name}'
+    async with aiohttp.ClientSession() as cs:
+        async with cs.get(url) as r:
+            data = await r.json()  
     return(data)
-
 
 def GenImage(data, color, player_name): # Generate the Points Stats Image
 
@@ -584,14 +583,16 @@ class UserPoints(commands.Cog): # Cog initiation
         await interaction.response.defer()
         user = interaction.user
         player_name = player
-        data = Scrape(player_name)
+        data = await Scrape(player_name)
 
         if data == {}:
             await interaction.followup.send("```arm\nERROR: \"Player Doesn't Exist\"\n```")
             return
 
         else:
-            file = GenImage(data, theme.value, player_name) # Generate the points Image
+            gen_image_params = functools.partial(GenImage, data, theme.value, player_name)
+            async with client:
+                file = await client.loop.run_in_executor(None, gen_image_params) # Generate the points Image, run in executor to prevent PIL from blocking
 
             em = discord.Embed(
                 title=f"{player_name}'s Stats",
