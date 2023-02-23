@@ -92,12 +92,12 @@ def Render(asset, eye_type, deg, iscenter, color, body_hsl, foot_hsl): # Render 
             x = c * (1 - abs(rgb_h % 2 - 1))
 
             # R, G, B = Any order of C, X, 0
-            if 0 <= rgb_h and rgb_h < 1: r, g, b = c, x, 0
-            if 1 <= rgb_h and rgb_h < 2: r, g, b = x, c, 0
-            if 2 <= rgb_h and rgb_h < 3: r, g, b = 0, c, x
-            if 3 <= rgb_h and rgb_h < 4: r, g, b = 0, x, c
-            if 4 <= rgb_h and rgb_h < 5: r, g, b = x, 0, c
-            if 5 <= rgb_h and rgb_h < 7: r, g, b = c, 0, x
+            if 0 <= rgb_h < 1: r, g, b = c, x, 0
+            if 1 <= rgb_h < 2: r, g, b = x, c, 0
+            if 2 <= rgb_h < 3: r, g, b = 0, c, x
+            if 3 <= rgb_h < 4: r, g, b = 0, x, c
+            if 4 <= rgb_h < 5: r, g, b = x, 0, c
+            if 5 <= rgb_h < 7: r, g, b = c, 0, x
 
             rgb_m = (l - c / 2)
             r, g, b = r + rgb_m, g + rgb_m, b + rgb_m
