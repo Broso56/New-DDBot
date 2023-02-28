@@ -33,7 +33,7 @@ def GenImage(data, color, player_name): # Generate the Points Stats Image
     # Get Colors
     colors = {
     "Blue" : [(13, 220, 241), "Into The Night"],
-    "Purple" : [(12, 107, 230), "Lotus"],
+    "Purple" : [(144, 87, 192), "Lotus"],
     "Red" : [(241, 13, 101), "Lockdown"],
     "Orange" : [(228, 113, 46), "Willow"],
     "Teal" : [(7, 98, 107), "Not Naufrage 4"]}
@@ -570,6 +570,7 @@ class UserPoints(commands.Cog): # Cog initiation
         self.client = client
         
     @client.tree.command(name="points", description='Generate a points stats image')
+    @tree.checks.cooldown(1, 15.0, key=lambda i: (i.guild_id, i.user.id))
     @tree.choices(
         theme=[
             Choice(name="Blue", value="Blue"),
@@ -581,26 +582,28 @@ class UserPoints(commands.Cog): # Cog initiation
     async def points(self, interaction: discord.Interaction, player: str, theme: Choice[str]):
         
         await interaction.response.defer()
-        user = interaction.user
         player_name = player
         data = await Scrape(player_name)
 
         if data == {}:
-            await interaction.followup.send("```arm\nERROR: \"Player Doesn't Exist\"\n```")
+            raise Exception("Player Doesn't Exist")
             return
 
         else:
             gen_image_params = functools.partial(GenImage, data, theme.value, player_name)
             async with client:
                 file = await client.loop.run_in_executor(None, gen_image_params) # Generate the points Image, run in executor to prevent PIL from blocking
-
-            em = discord.Embed(
-                title=f"{player_name}'s Stats",
-                description="Please report any issues with the image")
-
-            em.set_image(url="attachment://image.png")
-
-            await interaction.followup.send(file=file, embed=em)
+            await interaction.followup.send(file=file)
+        
+    
+    @points.error # Error Handling
+    async def on_points_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(f"```arm\nERROR: \"{error}\"\n```", ephemeral=True) # Errors before Interaction response
+        else: # TODO: Fix so ephemeral actually works
+            if "Command 'points' raised an exception: Exception:" in str(error):
+                error = str(error).replace("Command 'points' raised an exception: Exception:", "")[1:]
+            await interaction.followup.send(f"```arm\nERROR: \"{error}\"\n```", ephemeral=True) # Errors after Interaction response
 
 async def setup(client): # Adding the class as a cog
     await client.add_cog(UserPoints(client))

@@ -17,7 +17,6 @@ client = commands.Bot(command_prefix="^", help_command=None, case_insensitive=Tr
 tree = app_commands
 
 def Render(asset, eye_type, deg, iscenter, color, body_hsl, foot_hsl): # Render the tee from asset image
-    invalid_dim = False
 
     asset_bytes = BytesIO(asset) # Turn bytes object into BytesIO object
     asset_bytes.seek(0)
@@ -27,8 +26,7 @@ def Render(asset, eye_type, deg, iscenter, color, body_hsl, foot_hsl): # Render 
     m = im_w / 512 # Multiplies based on image size, 512x256 being base value
 
     if im_w != im_h*2: # Only accept 2:1 ratios
-        invalid_dim = True
-        return(invalid_dim)
+        raise Exception("Image Dimensions Aren't 2:1")
     
     # Positions for each asset
     positions = [
@@ -304,51 +302,58 @@ class TeeRender(commands.Cog):
         color=[
             Choice(name="True", value="True"),
             Choice(name="False", value="False")
+        ],
+        
+        center=[
+            Choice(name="True", value="True"),
+            Choice(name="False", value="False")
         ])
-    async def tee(self, interaction: discord.Interaction, image: discord.Attachment, eyes: Choice[int], deg: str, color: Choice[str], body_h: int, body_s: int, body_l: int, feet_h: int, feet_s: int, feet_l: int):
+    async def tee(self, interaction: discord.Interaction, image: discord.Attachment, eyes: Choice[int]=0, deg: int=90, center: Choice[str]="", color: Choice[str]="", body_hsl: str="0, 0, 0", feet_hsl: str="0, 0, 0"):
         await interaction.response.defer() # Give time for image to generate
-        body_color = body_h, body_s, body_l
-        feet_color = feet_h, feet_s, feet_l
         asset = await image.read()
-
         iscenter = False
         iscolor = False
+        if "," not in body_hsl or "," not in feet_hsl:
+            raise Exception("HSL Values must be seperated with \",\"")
+        else:
+            body_hsl = body_hsl.replace(" ", "") # Strip Spaces
+            feet_hsl = feet_hsl.replace(" ", "")
+            body_hsl = body_hsl.split(",") # Seperate numbers
+            feet_hsl = feet_hsl.split(",")
+            body_hsl = int(body_hsl[0]), int(body_hsl[1]), int(body_hsl[2]) # Turn string into int, pack into tuple
+            feet_hsl = int(feet_hsl[0]), int(feet_hsl[1]), int(feet_hsl[2])
 
+        if hasattr(center, "value"):
+            if center.value == "True":
+                iscenter = True
+        
+        if hasattr(color, "value"):
+            if color.value == "True":
+                iscolor = True
 
-        if deg.lower() == "center": iscenter = True
-        else: deg = int(deg); iscenter = False
-
+        if hasattr(eyes, "value"):
+            eyes = eyes.value
+        
         if not iscenter: # Check if degrees are valid
             if deg < 0 or deg > 360:
-                await interaction.followup.send("```arm\nERROR: \"Invalid Number for degrees, Valid Number: 0-360\"\n```")
-                return
-
-        if color.value == "True":
-            iscolor = True
+                raise Exception("Invalid Number for degrees, Valid Number: 0-360")
         
         if iscolor: # Check if colors are valid
-            for part_color in body_color:
+            for part_color in body_hsl:
                 if part_color > 255 or part_color < 0:
-                    await interaction.followup.send("```arm\nERROR: \"Invalid Number for Body Color, Valid Number: 0-255\"\n```")
-                    return
+                    raise Exception("Invalid Number for Body Color, Valid Number: 0-255")
 
-            for part_color in feet_color:
+            for part_color in feet_hsl:
                 if part_color > 255 or part_color < 0:
-                    await interaction.followup.send("```arm\nERROR: \"Invalid Number for Feet Color, Valid Number: 0-255\"\n```")
-                    return
+                    raise Exception("Invalid Number for Feet Color, Valid Number: 0-255")
 
         else:
-            body_color = 0, 0, 0
-            feet_color = 0, 0, 0
-        
-        render_param = functools.partial(Render, asset, eyes.value, deg, iscenter, iscolor, body_color, feet_color) # Pack all parameters into a single variable
+            body_hsl = 0, 0, 0
+            feet_hsl = 0, 0, 0
 
+        render_param = functools.partial(Render, asset, eyes, deg, iscenter, iscolor, body_hsl, feet_hsl) # Pack all parameters into a single variable
         async with client:
             file = await client.loop.run_in_executor(None, render_param) # Render Tee (Run in executor to prevent PIL blocking the event loop)
-
-        if file == True: # Function returns invalid_dimensions as true if the dimensions arent 2:1
-            await interaction.followup.send("```arm\nERROR: \"Image Dimensions Aren't 2:1\"\n```")
-            return
 
         em = discord.Embed(
             title=f"Tee Render",
@@ -356,6 +361,13 @@ class TeeRender(commands.Cog):
 
         em.set_image(url="attachment://image.png")
         await interaction.followup.send(file=file, embed=em)
+    
+    @tee.error # Error Handling
+    async def on_tee_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
+            # TODO: Fix so ephemeral actually works
+            if "Command 'tee' raised an exception: Exception:" in str(error):
+                error = str(error).replace("Command 'tee' raised an exception: Exception:", "")[1:]
+            await interaction.followup.send(f"```arm\nERROR: \"{error}\"\n```", ephemeral=True) # Errors after Interaction response
 
 async def setup(client): # Adding the class as a cog
     await client.add_cog(TeeRender(client))
