@@ -56,7 +56,7 @@ class HelpCommand(commands.Cog):
 <Type: Choice | Pull RANDOM or UNFINISHED map> \n[<OPTIONAL>]\n
 <Sort: Choice | Pull UNFINISHED map based off SORT> \n[<OPTIONAL>]
 
-[<ISSUES: Text in Team ranks arent't centered if downscaled>]
+[<ISSUES: Text in Team ranks are not centered if downscaled>]
 ```""")
 
         await interaction.response.send_message(embed=em, ephemeral=True)
