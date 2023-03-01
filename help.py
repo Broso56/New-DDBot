@@ -18,7 +18,7 @@ class HelpCommand(commands.Cog):
         Choice(name="Render", value="Render"),
         Choice(name="Random", value="Random"),
         Choice(name="Points", value="Points"),
-        Choice(name="Map Info", value="Map Info")])
+        Choice(name="Map", value="Map")])
     async def help(self, interaction: discord.Interaction, command: Choice[str]):
         em = discord.Embed(title=f"{command.value} Info")
 
