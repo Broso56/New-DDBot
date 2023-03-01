@@ -32,8 +32,8 @@ class HelpCommand(commands.Cog):
 <Deg: Number (0-360) | The angle the eyes face> \n[<OPTIONAL>]\n
 <Center: Choice | If the eyes are in the center> \n[<OPTIONAL>]\n
 <Color: Choice | If the Tee is colored or not> \n[<OPTIONAL>]\n
-<Body HSL: Number (0-255) | Color for the body> \n[<OPTIONAL>]\n
-<Feet HSL: Number (0-255) | Color for the feet> \n[<OPTIONAL>]\n
+<Body HSL: 3 Numbers (0-255) | Color for the body> \n[<OPTIONAL>]\n
+<Feet HSL: 3 Numbers (0-255) | Color for the feet> \n[<OPTIONAL>]\n
 
 [<ISSUES: None that are known>]
 ```""")
