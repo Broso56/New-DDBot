@@ -27,6 +27,7 @@ class DiscordBot(commands.Bot): # Override setup hook
         await client.load_extension('Stats.mapinfo')
         await client.load_extension('Misc.Tee Render')
         await client.load_extension('Misc.Random Tee Render')
+        await client.load_extension('help')
         await client.load_extension('test')
         await client.start(token) # Client token. NEVER share this with anyone, as it gives them access to your bot.
 
@@ -36,6 +37,7 @@ class DiscordBot(commands.Bot): # Override setup hook
     Choice(name='Map', value="Stats.mapinfo"),
     Choice(name='Render', value='Misc.Tee Render'),
     Choice(name='Random', value='Misc.Random Tee Render'),
+    Choice(name="Help", value="help"),
     Choice(name='Test', value='test')
     ])
 
@@ -54,13 +56,13 @@ async def on_reload_error(interaction: discord.Interaction, error: app_commands.
 
 @client.command(name="sync")
 @commands.is_owner()
-async def sync(interaction: discord.Interaction):
+async def sync(ctx):
     try:
         synced = await client.tree.sync()
-        await interaction.response.send_message(f"Synced {len(synced)} command(s)", ephemeral=True)
+        await ctx.send(f"Synced {len(synced)} command(s)", ephemeral=True)
         return
     except Exception as e:
-        await interaction.response.send_message(str(e), ephemeral=True)
+        await ctx.send(str(e), ephemeral=True)
         return
 
 asyncio.run(DiscordBot.setup_hook())
