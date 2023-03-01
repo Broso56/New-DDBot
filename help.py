@@ -34,13 +34,15 @@ class HelpCommand(commands.Cog):
 <Color: Choice | If the Tee is colored or not> \n[<OPTIONAL>]\n
 <Body HSL: Number (0-255) | Color for the body> \n[<OPTIONAL>]\n
 <Feet HSL: Number (0-255) | Color for the feet> \n[<OPTIONAL>]\n
+
+[<ISSUES: None that are known>]
 ```""")
 
         elif command.value == "Random":
-            em.add_field(name="\u200b", value="```html\n[<USE: Renders a random tee with random settings>]```")
+            em.add_field(name="\u200b", value="```html\n[<USE: Renders a random tee with random settings>]\n[<ISSUES: None that are known>]```")
 
         elif command.value == "Points":
-            em.add_field(name="\u200b", value="```html\n[<USE: Gives a Points stats Image>]\n\n<Player: Name | Profile to check> [<REQUIRED>]\n<Theme: Choice | Color Theme> [<OPTIONAL>]```")
+            em.add_field(name="\u200b", value="```html\n[<USE: Gives a Points stats Image>]\n\n<Player: Name | Profile to check> [<REQUIRED>]\n<Theme: Choice | Color Theme> [<OPTIONAL>]\n\n[<ISSUES: Points Graph offset if user has too few points>]```")
 
         elif command.value == "Map Info":
             em.add_field(name="\u200b", value="""
@@ -53,6 +55,8 @@ class HelpCommand(commands.Cog):
 <Category: Choice | Category to pull map from> \n[<OPTIONAL>]\n
 <Type: Choice | Pull RANDOM or UNFINISHED map> \n[<OPTIONAL>]\n
 <Sort: Choice | Pull UNFINISHED map based off SORT> \n[<OPTIONAL>]
+
+[<ISSUES: Text in Team ranks arent't centered if downscaled>]
 ```""")
 
         await interaction.response.send_message(embed=em, ephemeral=True)
