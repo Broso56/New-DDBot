@@ -98,7 +98,7 @@ async def GetData(player=None, map=None, random=False, category="All", unfinishe
     elif map is not None:
         map_data = await Scrape(map=map)
     
-    else:
+    if map_data == {}:
         raise Exception("Invalid Map")
     
     return map_data
