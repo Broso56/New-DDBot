@@ -314,7 +314,7 @@ class TeeRender(commands.Cog):
         iscenter = False
         iscolor = False
         if "," not in body_hsl or "," not in feet_hsl:
-            raise Exception("HSL Values must be seperated with \",\"")
+            raise Exception("HSL Values must be seperated with ,")
         else:
             body_hsl = body_hsl.replace(" ", "") # Strip Spaces
             feet_hsl = feet_hsl.replace(" ", "")
@@ -365,8 +365,8 @@ class TeeRender(commands.Cog):
     @tee.error # Error Handling
     async def on_tee_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
             # TODO: Fix so ephemeral actually works
-            if "Command 'tee' raised an exception: Exception:" in str(error):
-                error = str(error).replace("Command 'tee' raised an exception: Exception:", "")[1:]
+            if "Command 'render' raised an exception: Exception:" in str(error):
+                error = str(error).replace("Command 'render' raised an exception: Exception:", "")[1:]
             await interaction.followup.send(f"```arm\nERROR: \"{error}\"\n```", ephemeral=True) # Errors after Interaction response
 
 async def setup(client): # Adding the class as a cog
