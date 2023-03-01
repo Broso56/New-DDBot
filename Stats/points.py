@@ -579,7 +579,7 @@ class UserPoints(commands.Cog): # Cog initiation
             Choice(name="Orange", value="Orange"),
             Choice(name="Teal", value="Teal")
             ])
-    async def points(self, interaction: discord.Interaction, player: str, theme: Choice[str]):
+    async def points(self, interaction: discord.Interaction, player: str, theme: Choice[str]="Blue"):
         
         await interaction.response.defer()
         player_name = player
@@ -590,7 +590,10 @@ class UserPoints(commands.Cog): # Cog initiation
             return
 
         else:
-            gen_image_params = functools.partial(GenImage, data, theme.value, player_name)
+            if hasattr(theme, "value"):
+                theme = theme.value
+
+            gen_image_params = functools.partial(GenImage, data, theme, player_name)
             async with client:
                 file = await client.loop.run_in_executor(None, gen_image_params) # Generate the points Image, run in executor to prevent PIL from blocking
             await interaction.followup.send(file=file)
