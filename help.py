@@ -34,6 +34,7 @@ class HelpCommand(commands.Cog):
 <Color: Choice | If the Tee is colored or not> \n[<OPTIONAL>]\n
 <Body HSL: 3 Numbers (0-255) | Color for the body> \n[<OPTIONAL>]\n
 <Feet HSL: 3 Numbers (0-255) | Color for the feet> \n[<OPTIONAL>]\n
+<Band: Choice | If it renders multiple tees or not> \n[<OPTIONAL>]\n
 
 [<ISSUES: None that are known>]
 ```""")
